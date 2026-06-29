@@ -48,7 +48,9 @@ export async function deletePresent(id: string): Promise<void> {
 }
 
 export async function claimPresent(id: string, presentName: string, donorName: string): Promise<void> {
-  await updateDoc(doc(db, 'presents', id), { status: 'claimed' });
+  if (id !== 'special-donation') {
+    await updateDoc(doc(db, 'presents', id), { status: 'claimed' });
+  }
   await addDoc(collection(db, 'donations'), {
     present_id: id,
     present_name: presentName,

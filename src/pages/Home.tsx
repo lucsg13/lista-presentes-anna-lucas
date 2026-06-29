@@ -68,7 +68,9 @@ const Home = () => {
     setIsClaiming(true);
     try {
       await claimPresent(selectedGift.id, selectedGift.title, donorName.trim() || 'Anônimo');
-      setGifts(gifts.map(g => g.id === selectedGift.id ? { ...g, status: 'claimed' } : g));
+      if (selectedGift.id !== 'special-donation') {
+        setGifts(gifts.map(g => g.id === selectedGift.id ? { ...g, status: 'claimed' } : g));
+      }
       setModalStep(3);
     } catch (err) {
       console.error(err);
