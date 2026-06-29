@@ -7,7 +7,7 @@ permissions:
   checks: write
   contents: read
   pull-requests: write
-  id-token: write
+  id-token: i0pSJBZMGmKOWNVveHSuPKu8MkUXNWB89wmD1cyB9wo
 
 jobs:
   build_and_preview:
