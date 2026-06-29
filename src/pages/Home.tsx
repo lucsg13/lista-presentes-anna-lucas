@@ -66,12 +66,19 @@ const Home = () => {
       <section className="hero-section">
         <div className="hero-content">
           <div className="hero-content-inner">
-            <span className="hero-badge animate-in">
-              ✦ Sejam bem-vindos!
-            </span>
-            <h1 className="text-headline-lg text-primary hero-title animate-in animate-in-delay-1">
-              📦 Mudança à vista!
-            </h1>
+            <div className="hero-header-flex animate-in">
+              <div className="hero-header-text">
+                <span className="hero-badge">
+                  ✦ Sejam bem-vindos!
+                </span>
+                <h1 className="text-headline-lg text-primary hero-title animate-in-delay-1">
+                  📦 Mudança à vista!
+                </h1>
+              </div>
+              <div className="hero-profile-container animate-in-delay-1">
+                <img src="/couple.jpeg" alt="Anna & Lucas" className="hero-profile-image" />
+              </div>
+            </div>
             <div className="hero-divider animate-in animate-in-delay-2" />
             <div className="text-body-lg text-on-surface-variant hero-text animate-in animate-in-delay-2">
               <p>Família e amigos, finalmente estamos de malas prontas para começar nossa nova vida juntos! 🏠✨<br/>
