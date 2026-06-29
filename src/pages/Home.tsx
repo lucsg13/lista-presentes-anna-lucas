@@ -22,8 +22,9 @@ const Home = () => {
   const [toastVisible, setToastVisible] = useState(false);
   const [gifts, setGifts] = useState<any[]>([]);
   const [selectedGift, setSelectedGift] = useState<any | null>(null);
-  const [modalStep, setModalStep] = useState<1 | 2 | 3>(1);
+  const [modalStep, setModalStep] = useState<number>(1);
   const [isClaiming, setIsClaiming] = useState(false);
+  const [pendingLink, setPendingLink] = useState('');
 
   useEffect(() => {
     getPresents()
@@ -69,6 +70,11 @@ const Home = () => {
     if (gift.status === 'claimed') return;
     setSelectedGift(gift);
     setModalStep(1);
+  };
+
+  const handleLinkClick = (link: string) => {
+    setPendingLink(link);
+    setModalStep(4);
   };
 
   const copyPix = () => {
@@ -263,9 +269,9 @@ const Home = () => {
                       <h4 className="text-label-lg text-on-background" style={{ marginBottom: '8px' }}>Links Sugeridos</h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {selectedGift.links.map((link: string, i: number) => link.trim() !== '' && (
-                          <a key={i} href={link} target="_blank" rel="noreferrer" className="btn-outline text-label-md" style={{ justifyContent: 'center', width: '100%' }}>
+                          <button key={i} onClick={() => handleLinkClick(link)} className="btn-outline text-label-md" style={{ justifyContent: 'center', width: '100%' }}>
                             Ver Opção {i + 1} na Loja
-                          </a>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -288,18 +294,18 @@ const Home = () => {
                 </p>
                 
                 <div style={{ backgroundColor: 'var(--surface-variant)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>QR Code</p>
                   <img src="/pix-qrcode.png" alt="QR Code PIX" style={{ width: '150px', height: '150px', margin: '0 auto 16px', display: 'block', borderRadius: '8px', border: '4px solid white' }} />
-                  <p className="text-label-md text-on-background" style={{ marginBottom: '4px' }}>Código PIX (Copia e Cola)</p>
-                  <p className="text-body-md text-primary" style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>
-                    {config.pixKey.substring(0, 20)}...{config.pixKey.substring(config.pixKey.length - 15)}
-                  </p>
+                  
+                  <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>Chave PIX</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <p className="text-body-lg text-primary" style={{ fontWeight: 'bold' }}>65 9 9997-6652</p>
+                    <button onClick={copyPix} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', display: 'flex', alignItems: 'center', padding: '4px' }} title="Copiar Chave PIX">
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>content_copy</span>
+                    </button>
+                  </div>
                   <p className="text-label-sm text-secondary" style={{ marginTop: '4px' }}>{config.pixName}</p>
                 </div>
-
-                <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center', marginBottom: '24px' }} onClick={copyPix}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>content_copy</span>
-                  Copiar Código PIX
-                </button>
                 
                 <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)', marginBottom: '24px' }} />
                 
@@ -329,6 +335,37 @@ const Home = () => {
                 <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setSelectedGift(null)}>
                   Fechar
                 </button>
+              </div>
+            )}
+
+            {modalStep === 4 && (
+              <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+                <span className="material-symbols-outlined text-primary" style={{ fontSize: '48px', marginBottom: '16px' }}>storefront</span>
+                <h3 className="text-headline-md text-on-background" style={{ marginBottom: '16px' }}>Indo para a loja!</h3>
+                <p className="text-body-md text-on-surface-variant" style={{ marginBottom: '32px', lineHeight: '1.5' }}>
+                  Você será redirecionado para a loja do produto.<br/><br/>
+                  Deseja já <strong>reservar este presente</strong> na nossa lista (para ninguém comprar repetido) ou vai apenas dar uma olhadinha por enquanto?
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => {
+                    window.open(pendingLink, '_blank');
+                    handleClaim();
+                  }} disabled={isClaiming}>
+                    {isClaiming ? 'Confirmando...' : 'Vou comprar e Confirmar Presente'}
+                  </button>
+                  
+                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => {
+                    window.open(pendingLink, '_blank');
+                    setModalStep(1);
+                  }}>
+                    Apenas dar uma olhadinha
+                  </button>
+                  
+                  <button className="btn-text text-label-md" style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }} onClick={() => setModalStep(1)}>
+                    Voltar
+                  </button>
+                </div>
               </div>
             )}
           </div>
