@@ -1,0 +1,256 @@
+import { useState, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { config, categories } from '../config/data';
+import { useCart } from '../context/CartContext';
+import Toast from '../components/Toast';
+import { getPresents } from '../services/api';
+
+interface Present {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  description: string;
+  links: string[];
+  image_url: string;
+}
+
+const Home = () => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+  const [gifts, setGifts] = useState<any[]>([]);
+  const [selectedGift, setSelectedGift] = useState<any | null>(null);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    getPresents()
+      .then((data: Present[]) => {
+        const formattedGifts = data.map(p => ({
+          id: p.id.toString(),
+          title: p.name,
+          price: p.price,
+          category: p.category || 'Geral',
+          description: p.description,
+          links: p.links,
+          imageUrl: p.image_url || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600&auto=format&fit=crop',
+          status: 'available'
+        }));
+        setGifts(formattedGifts);
+      })
+      .catch(err => console.error('Error fetching presents:', err));
+  }, []);
+
+  const filteredGifts = selectedCategory && selectedCategory !== 'Geral'
+    ? gifts.filter(g => g.category === selectedCategory)
+    : gifts;
+
+  const displayedGifts = showAll ? filteredGifts : filteredGifts.slice(0, 4);
+
+  const handleAddToCart = useCallback((gift: typeof gifts[0]) => {
+    addToCart({
+      id: gift.id,
+      title: gift.title,
+      price: gift.price,
+      category: gift.category,
+      imageUrl: gift.imageUrl,
+    });
+    setToastMsg(`${gift.title} adicionado ao carrinho!`);
+    setToastVisible(true);
+  }, [addToCart]);
+
+  return (
+    <>
+      {/* ── HERO ── */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <div className="hero-content-inner">
+            <span className="hero-badge animate-in">
+              ✦ Sejam bem-vindos!
+            </span>
+            <h1 className="text-headline-lg text-primary hero-title animate-in animate-in-delay-1">
+              📦 Mudança à vista!
+            </h1>
+            <div className="hero-divider animate-in animate-in-delay-2" />
+            <div className="text-body-lg text-on-surface-variant hero-text animate-in animate-in-delay-2">
+              <p>Família e amigos, finalmente estamos de malas prontas para começar nossa nova vida juntos! 🏠✨<br/>
+              Para comemorar esse passo tão importante, vamos fazer um Chá de Casa Nova e queremos você lá com a gente!</p>
+              
+              <p><strong>🎁 Quer nos dar uma força?</strong><br/>
+              Como começar do zero dá trabalho (e haja pano de prato!), montamos uma lista com coisinhas que vão deixar nosso lar com a nossa cara. Ajudem a gente com algum dos presentes abaixo!</p>
+              
+              <p>Aproveita e já confirma sua presença no final da página 💗</p>
+            </div>
+            <div className="hero-buttons animate-in animate-in-delay-3">
+              <a href="#registry" className="btn-primary text-label-md">
+                Ver Lista de Presentes
+              </a>
+              <Link to="/rsvp" className="btn-secondary text-label-md">
+                Confirmar Presença
+              </Link>
+            </div>
+          </div>
+        </div>
+        <div className="hero-image-container">
+          <img src="/hero.jpg" alt="Mudança à vista - Nosso Novo Lar" className="hero-image" />
+        </div>
+      </section>
+
+      {/* ── DETAILS ── */}
+      <section className="details-section" id="story">
+        <div className="container">
+          <div className="details-header">
+            <h2 className="text-headline-md text-on-background">Os Detalhes</h2>
+            <p className="text-body-md text-on-surface-variant">Tudo que você precisa saber para o nosso encontro.</p>
+          </div>
+          <div className="details-grid">
+            <div className="detail-card animate-in">
+              <div className="icon-container">
+                <span className="material-symbols-outlined">calendar_month</span>
+              </div>
+              <h3 className="text-headline-sm text-on-background detail-card-title">Quando</h3>
+              <p className="text-body-md text-on-surface-variant">{config.events.date}</p>
+              <p className="text-label-md text-secondary detail-card-subtitle">{config.events.time}</p>
+            </div>
+            <div className="detail-card animate-in animate-in-delay-1">
+              <div className="icon-container">
+                <span className="material-symbols-outlined">location_on</span>
+              </div>
+              <h3 className="text-headline-sm text-on-background detail-card-title">Onde</h3>
+              <p className="text-body-md text-on-surface-variant">{config.events.locationName}</p>
+              <p className="text-body-md text-on-surface-variant detail-card-address">{config.events.address}</p>
+              <a href={config.events.mapUrl} className="text-label-md text-primary detail-card-link">
+                Ver no Mapa <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── GIFT REGISTRY ── */}
+      <section className="registry-section" id="registry">
+        <div className="container">
+          <div className="registry-header">
+            <h2 className="text-headline-md text-on-background registry-title">Lista de Presentes</h2>
+            <p className="text-body-md text-on-surface-variant registry-subtitle">
+              Sua presença é o nosso maior presente! Mas se quiser nos ajudar a montar nossa casa, selecionamos alguns itens que precisamos.
+            </p>
+            <div className="category-filters">
+              <button
+                className={`category-pill ${selectedCategory === null ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(null)}
+              >
+                Todos
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  className={`category-pill ${selectedCategory === cat ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="gift-grid">
+            {displayedGifts.map((gift, index) => (
+              <div key={gift.id} className="gift-card animate-in" style={{ animationDelay: `${index * 0.08}s`, cursor: 'pointer' }} onClick={() => setSelectedGift(gift)}>
+                <div className="gift-image-wrap">
+                  <img
+                    src={gift.imageUrl}
+                    alt={gift.title}
+                    className="gift-image"
+                    style={gift.status === 'claimed' ? { filter: 'grayscale(80%)', opacity: 0.7 } : {}}
+                  />
+                  {gift.status === 'claimed' && (
+                    <div className="claimed-overlay">
+                      <span className="claimed-badge">
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                        Já Presenteado
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="gift-info" style={gift.status === 'claimed' ? { opacity: 0.5 } : {}}>
+                  <span className="text-label-sm text-secondary">{gift.category}</span>
+                  <h3 className="text-headline-sm text-on-background gift-title">{gift.title}</h3>
+                  <p className="gift-price">R$ {gift.price.toFixed(2).replace('.', ',')}</p>
+
+                  <div className="gift-actions">
+                    {gift.status === 'available' ? (
+                      <button className="btn-present" onClick={(e) => { e.stopPropagation(); setSelectedGift(gift); }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>visibility</span>
+                        Ver Detalhes
+                      </button>
+                    ) : (
+                      <button className="btn-present-disabled" disabled>
+                        Indisponível
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredGifts.length > 4 && (
+            <div className="show-more-btn">
+              <button className="btn-outline text-label-md" onClick={() => setShowAll(!showAll)}>
+                {showAll ? 'Ver Menos' : 'Ver Todos os Itens'}
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── MODAL ── */}
+      {selectedGift && (
+        <div className="modal-overlay" onClick={() => setSelectedGift(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div className="modal-content animate-in" onClick={e => e.stopPropagation()} style={{ backgroundColor: 'var(--surface)', borderRadius: '16px', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button onClick={() => setSelectedGift(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--surface-variant)', color: 'var(--on-surface-variant)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+            </button>
+            <img src={selectedGift.imageUrl} alt={selectedGift.title} style={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }} />
+            <div style={{ padding: '24px' }}>
+              <span className="text-label-sm text-secondary">{selectedGift.category}</span>
+              <h3 className="text-headline-md text-on-background" style={{ margin: '8px 0' }}>{selectedGift.title}</h3>
+              <p className="text-headline-sm text-primary" style={{ marginBottom: '16px' }}>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</p>
+              
+              {selectedGift.description && (
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 className="text-label-lg text-on-background" style={{ marginBottom: '8px' }}>Descrição</h4>
+                  <p className="text-body-md text-on-surface-variant" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>{selectedGift.description}</p>
+                </div>
+              )}
+              
+              {selectedGift.links && selectedGift.links.length > 0 && selectedGift.links[0] !== '' && (
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 className="text-label-lg text-on-background" style={{ marginBottom: '8px' }}>Links Sugeridos</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {selectedGift.links.map((link: string, i: number) => link.trim() !== '' && (
+                      <a key={i} href={link} target="_blank" rel="noreferrer" className="btn-outline text-label-md" style={{ justifyContent: 'center', width: '100%' }}>
+                        Ver Opção {i + 1}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { handleAddToCart(selectedGift); setSelectedGift(null); }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_shopping_cart</span>
+                Presentear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Toast message={toastMsg} visible={toastVisible} onClose={() => setToastVisible(false)} />
+    </>
+  );
+};
+
+export default Home;

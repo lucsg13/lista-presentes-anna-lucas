@@ -1,0 +1,118 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: presents
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1-200 chars) - Name of the present
+//   - price: number (required, > 0) - Price in BRL
+//   - link: string (optional, 0-2000 chars) - URL to buy the product
+//   - image_url: string (optional, 0-2000 chars) - URL of the product image
+//
+// Collection: rsvps
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1-200 chars) - Guest name
+//   - email: string (optional, 0-200 chars) - Guest email
+//   - phone: string (required, 1-50 chars) - Guest phone
+//   - message: string (optional, 0-1000 chars) - Message from guest
+//   - status: string (required, enum: 'confirmed'|'declined') - RSVP status
+//   - companion: string (required, enum: 'yes'|'no') - Has companion
+//   - companion_name: string (optional, 0-200 chars) - Companion name
+//   - created_at: string (required, ISO 8601 format) - Creation timestamp
+//
+// ===============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isOptionalString(field, maxLen) {
+      return !(field in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidPresent() {
+      return hasRequiredFields(['name', 'price', 'category', 'description', 'links']) &&
+             hasOnlyAllowedFields(['name', 'price', 'category', 'description', 'links', 'image_url', 'link']) &&
+             validStringLength('name', 1, 200) &&
+             request.resource.data.price is number &&
+             request.resource.data.price > 0 &&
+             validStringLength('category', 1, 100) &&
+             request.resource.data.description is string &&
+             request.resource.data.description.size() <= 2000 &&
+             request.resource.data.links is list &&
+             request.resource.data.links.size() <= 20 &&
+             isOptionalString('image_url', 2000) &&
+             isOptionalString('link', 2000);
+    }
+
+    function isValidRSVP() {
+      return hasRequiredFields(['name', 'phone', 'status', 'companion', 'created_at']) &&
+             hasOnlyAllowedFields(['name', 'email', 'phone', 'message', 'status', 'companion', 'companion_name', 'created_at']) &&
+             validStringLength('name', 1, 200) &&
+             validStringLength('phone', 1, 50) &&
+             request.resource.data.status in ['confirmed', 'declined'] &&
+             request.resource.data.companion in ['yes', 'no'] &&
+             isOptionalString('email', 200) &&
+             isOptionalString('message', 1000) &&
+             isOptionalString('companion_name', 200) &&
+             request.resource.data.created_at is string &&
+             request.resource.data.created_at.size() <= 50;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Presents: public read, authenticated write
+    match /presents/{presentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidPresent();
+      allow update: if isAuthenticated() && isValidPresent();
+      allow delete: if isAuthenticated();
+    }
+
+    // RSVPs: public create (form submission), authenticated read/delete
+    match /rsvps/{rsvpId} {
+      allow create: if isValidRSVP();
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated();
+      allow update: if false;
+    }
+
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
