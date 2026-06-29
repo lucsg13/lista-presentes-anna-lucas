@@ -15,6 +15,17 @@ interface Present {
   status?: 'available' | 'claimed';
 }
 
+const SPECIAL_GIFT = {
+  id: 'special-donation',
+  title: 'Doe o que seu coraçãozinho mandar',
+  description: 'Doe o que vc quiser e puder, não importa o valor, receberemos com muito carinho e prazer. Muito Obrigado! ',
+  price: 0,
+  category: 'Especial',
+  imageUrl: '/doa.jpeg',
+  links: [],
+  status: 'available'
+};
+
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
@@ -39,7 +50,7 @@ const Home = () => {
           imageUrl: p.image_url || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600&auto=format&fit=crop',
           status: p.status || 'available'
         }));
-        setGifts(formattedGifts);
+        setGifts([SPECIAL_GIFT, ...formattedGifts]);
       })
       .catch(err => console.error('Error fetching presents:', err));
   }, []);
@@ -211,7 +222,7 @@ const Home = () => {
                 <div className="gift-info" style={gift.status === 'claimed' ? { opacity: 0.5 } : {}}>
                   <span className="text-label-sm text-secondary">{gift.category}</span>
                   <h3 className="text-headline-sm text-on-background gift-title">{gift.title}</h3>
-                  <p className="gift-price">R$ {gift.price.toFixed(2).replace('.', ',')}</p>
+                  <p className="gift-price">{gift.price === 0 ? 'Valor à sua escolha' : `R$ ${gift.price.toFixed(2).replace('.', ',')}`}</p>
 
                   <div className="gift-actions">
                     {gift.status === 'available' ? (
@@ -255,7 +266,9 @@ const Home = () => {
                 <div style={{ padding: '24px' }}>
                   <span className="text-label-sm text-secondary">{selectedGift.category}</span>
                   <h3 className="text-headline-md text-on-background" style={{ margin: '8px 0' }}>{selectedGift.title}</h3>
-                  <p className="text-headline-sm text-primary" style={{ marginBottom: '16px' }}>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</p>
+                  <p className="text-headline-sm text-primary" style={{ marginBottom: '16px' }}>
+                    {selectedGift.price === 0 ? 'Qualquer valor é bem-vindo!' : `R$ ${selectedGift.price.toFixed(2).replace('.', ',')}`}
+                  </p>
                   
                   {selectedGift.description && (
                     <div style={{ marginBottom: '24px' }}>
@@ -290,7 +303,11 @@ const Home = () => {
                 <span className="material-symbols-outlined text-primary" style={{ fontSize: '48px', marginBottom: '16px' }}>pix</span>
                 <h3 className="text-headline-md text-on-background" style={{ marginBottom: '8px' }}>Fazer PIX</h3>
                 <p className="text-body-md text-on-surface-variant" style={{ marginBottom: '24px' }}>
-                  Envie o valor de <strong>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</strong> para a chave abaixo:
+                  {selectedGift.price === 0 ? (
+                    <>Envie o valor que seu coração mandar para a chave abaixo:</>
+                  ) : (
+                    <>Envie o valor de <strong>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</strong> para a chave abaixo:</>
+                  )}
                 </p>
                 
                 <div style={{ backgroundColor: 'var(--surface-variant)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
