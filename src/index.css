@@ -993,7 +993,8 @@ input, textarea, select {
   border: 1px solid rgba(219, 193, 185, 0.25);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
   position: relative;
   overflow: hidden;

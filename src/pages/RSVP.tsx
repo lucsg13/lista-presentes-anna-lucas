@@ -7,7 +7,6 @@ const RSVP = () => {
   const [attendance, setAttendance] = useState<string | null>(null);
   
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [companion, setCompanion] = useState<string>('no');
   const [companionName, setCompanionName] = useState('');
@@ -20,7 +19,6 @@ const RSVP = () => {
     try {
       await addRSVP({
         name,
-        email,
         phone,
         status: attendance === 'yes' ? 'confirmed' : 'declined',
         companion,
@@ -62,7 +60,6 @@ const RSVP = () => {
                 setSubmitted(false);
                 setAttendance(null);
                 setName('');
-                setEmail('');
                 setPhone('');
                 setCompanion('no');
                 setCompanionName('');
@@ -109,18 +106,6 @@ const RSVP = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="email" className="text-label-md text-on-surface-variant">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                placeholder="seu.email@exemplo.com"
-                className="input-field"
-                style={{ backgroundColor: 'var(--surface-bright)' }}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
 
             <div className="form-group">
               <label htmlFor="phoneNumber" className="text-label-md text-on-surface-variant">Telefone</label>

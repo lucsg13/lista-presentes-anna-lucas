@@ -126,8 +126,10 @@ const Home = () => {
               </div>
               <h3 className="text-headline-sm text-on-background detail-card-title">Onde</h3>
               <p className="text-body-md text-on-surface-variant">{config.events.locationName}</p>
-              <p className="text-body-md text-on-surface-variant detail-card-address">{config.events.address}</p>
-              <a href={config.events.mapUrl} className="text-label-md text-primary detail-card-link">
+              <a href={config.events.mapUrl} target="_blank" rel="noopener noreferrer" className="text-body-md text-on-surface-variant detail-card-address" style={{ textDecoration: 'underline', color: 'inherit', display: 'block', marginBottom: '12px' }}>
+                {config.events.address}
+              </a>
+              <a href={config.events.mapUrl} target="_blank" rel="noopener noreferrer" className="text-label-md text-primary detail-card-link">
                 Ver no Mapa <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>
               </a>
             </div>
@@ -142,6 +144,10 @@ const Home = () => {
             <h2 className="text-headline-md text-on-background registry-title">Lista de Presentes</h2>
             <p className="text-body-md text-on-surface-variant registry-subtitle">
               Sua presença é o nosso maior presente! Mas se quiser nos ajudar a montar nossa casa, selecionamos alguns itens que precisamos.
+
+              Ah, lembrando que você pode nos enviar pelo <a href={config.events.mapUrl} target="_blank" rel="noopener noreferrer" className="text-body-md text-on-surface-variant detail-card-address" style={{ textDecoration: 'underline', color: 'inherit', display: 'block', marginBottom: '12px' }}>
+                {config.events.mapUrl}
+              </a> ou o valor em dinheiro pelo PIX ou até mesmo comprar o presente e entregar na festa (se for pequeno, exemplo Air Fryer, panelas, jogos de cama, luminária, decorações e etc...)
             </p>
             <div className="category-filters">
               <button

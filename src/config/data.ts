@@ -2,11 +2,11 @@ export const config = {
   pixKey: "chadecasanova@anna-lucas.com",
   pixName: "Anna e Lucas",
   events: {
-    date: "Sábado, 15 de Outubro",
-    time: "A partir das 16:00",
-    address: "Rua Fictícia, 123 - Apto 45\nSão Paulo, SP",
-    locationName: "Nosso Novo Apê (Vila Madalena)",
-    mapUrl: "#"
+    date: "Sábado, 18 de Julho",
+    time: "Às 19h",
+    address: "R. Mario Pederneiras, 121 - Várzea, Recife - PE, 50741-300",
+    locationName: "Local do Chá",
+    mapUrl: "https://maps.google.com/?q=R.+Mario+Pederneiras,+121+-+Várzea,+Recife+-+PE,+50741-300"
   }
 };
 

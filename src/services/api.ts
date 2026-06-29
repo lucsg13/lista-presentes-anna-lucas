@@ -53,7 +53,7 @@ export async function deletePresent(id: string): Promise<void> {
 export interface RSVP {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   message: string;
   status: string;
