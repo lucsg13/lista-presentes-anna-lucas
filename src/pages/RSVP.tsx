@@ -12,6 +12,26 @@ const RSVP = () => {
   const [companionName, setCompanionName] = useState('');
   const [message, setMessage] = useState('');
 
+  const formatBrazilianPhone = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    const limitedDigits = digits.slice(0, 11);
+    
+    if (limitedDigits.length <= 2) {
+      return limitedDigits.length > 0 ? `(${limitedDigits}` : '';
+    } else if (limitedDigits.length <= 6) {
+      return `(${limitedDigits.slice(0, 2)}) ${limitedDigits.slice(2)}`;
+    } else if (limitedDigits.length <= 10) {
+      return `(${limitedDigits.slice(0, 2)}) ${limitedDigits.slice(2, 6)}-${limitedDigits.slice(6)}`;
+    } else {
+      return `(${limitedDigits.slice(0, 2)}) ${limitedDigits.slice(2, 7)}-${limitedDigits.slice(7)}`;
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatBrazilianPhone(e.target.value);
+    setPhone(formatted);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -117,7 +137,7 @@ const RSVP = () => {
                 className="input-field"
                 style={{ backgroundColor: 'var(--surface-bright)' }}
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={handlePhoneChange}
               />
             </div>
 
