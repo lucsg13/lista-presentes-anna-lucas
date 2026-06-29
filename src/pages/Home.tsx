@@ -295,7 +295,7 @@ const Home = () => {
                 
                 <div style={{ backgroundColor: 'var(--surface-variant)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
                   <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>QR Code</p>
-                  <img src="/pix-qrcode.png" alt="QR Code PIX" style={{ width: '150px', height: '150px', margin: '0 auto 16px', display: 'block', borderRadius: '8px', border: '4px solid white' }} />
+                  <img src="/pix.png" alt="QR Code PIX" style={{ width: '150px', height: '150px', margin: '0 auto 16px', display: 'block', borderRadius: '8px', border: '4px solid white' }} />
                   
                   <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>Chave PIX</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
