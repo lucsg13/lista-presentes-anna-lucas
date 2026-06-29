@@ -19,19 +19,29 @@ const Navbar = () => {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  const handleNavClick = (to: string) => {
+    if (location.pathname === to) {
+      if ((window as any).lenis) {
+        (window as any).lenis.scrollTo(0);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="container navbar-content">
-        <Link to="/" className="nav-logo">
+        <Link to="/" onClick={() => handleNavClick('/')} className="nav-logo">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: '22px' }}>favorite</span>
           Anna & Lucas
         </Link>
 
         <div className="nav-links">
-          <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
+          <Link to="/" onClick={() => handleNavClick('/')} className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
             A Lista
           </Link>
-          <Link to="/rsvp" className={`nav-link ${location.pathname === '/rsvp' ? 'active' : ''}`}>
+          <Link to="/rsvp" onClick={() => handleNavClick('/rsvp')} className={`nav-link ${location.pathname === '/rsvp' ? 'active' : ''}`}>
             Confirmar Presença
           </Link>
         </div>
@@ -51,11 +61,11 @@ const Navbar = () => {
       </div>
 
       <div className={`mobile-nav ${mobileOpen ? 'open' : ''}`}>
-        <Link to="/" className={`mobile-nav-link ${location.pathname === '/' ? 'active' : ''}`}>
+        <Link to="/" onClick={() => handleNavClick('/')} className={`mobile-nav-link ${location.pathname === '/' ? 'active' : ''}`}>
           <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>home</span>
           A Lista
         </Link>
-        <Link to="/rsvp" className={`mobile-nav-link ${location.pathname === '/rsvp' ? 'active' : ''}`}>
+        <Link to="/rsvp" onClick={() => handleNavClick('/rsvp')} className={`mobile-nav-link ${location.pathname === '/rsvp' ? 'active' : ''}`}>
           <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>mail</span>
           Confirmar Presença
         </Link>

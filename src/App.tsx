@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import Lenis from 'lenis';
 
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -12,10 +14,51 @@ import ManagePresents from './pages/admin/ManagePresents';
 import ManageRSVP from './pages/admin/ManageRSVP';
 import AdminLogin from './pages/admin/AdminLogin';
 
+function ScrollManager() {
+  const { pathname } = useLocation();
+  const lenisRef = useRef<Lenis | null>(null);
+
+  useEffect(() => {
+    // Initialize Lenis
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+    });
+
+    lenisRef.current = lenis;
+    (window as any).lenis = lenis;
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+      lenisRef.current = null;
+      (window as any).lenis = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (lenisRef.current) {
+      // Smooth scroll to top on route change
+      lenisRef.current.scrollTo(0, { immediate: true });
+    }
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <AuthProvider>
         <Router>
+          <ScrollManager />
           <Navbar />
           <main style={{ flexGrow: 1, paddingTop: '72px' }}>
             <Routes>
