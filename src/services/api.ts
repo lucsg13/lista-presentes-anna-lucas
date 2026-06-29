@@ -47,8 +47,37 @@ export async function deletePresent(id: string): Promise<void> {
   await deleteDoc(doc(db, 'presents', id));
 }
 
-export async function claimPresent(id: string): Promise<void> {
+export async function claimPresent(id: string, presentName: string, donorName: string): Promise<void> {
   await updateDoc(doc(db, 'presents', id), { status: 'claimed' });
+  await addDoc(collection(db, 'donations'), {
+    present_id: id,
+    present_name: presentName,
+    donor_name: donorName,
+    created_at: new Date().toISOString()
+  });
+}
+
+// ==========================================
+// DONATIONS
+// ==========================================
+
+export interface Donation {
+  id: string;
+  present_id: string;
+  present_name: string;
+  donor_name: string;
+  created_at: string;
+}
+
+export async function getDonations(): Promise<Donation[]> {
+  const q = query(collection(db, 'donations'), orderBy('created_at', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Donation));
+}
+
+export async function deleteDonation(donationId: string, presentId: string): Promise<void> {
+  await deleteDoc(doc(db, 'donations', donationId));
+  await updateDoc(doc(db, 'presents', presentId), { status: 'available' });
 }
 
 // ==========================================

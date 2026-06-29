@@ -12,6 +12,7 @@ import RSVP from './pages/RSVP';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManagePresents from './pages/admin/ManagePresents';
 import ManageRSVP from './pages/admin/ManageRSVP';
+import ManageDonations from './pages/admin/ManageDonations';
 import AdminLogin from './pages/admin/AdminLogin';
 
 function ScrollManager() {
@@ -69,6 +70,7 @@ function App() {
               <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/presents" element={<ProtectedRoute><ManagePresents /></ProtectedRoute>} />
               <Route path="/admin/rsvp" element={<ProtectedRoute><ManageRSVP /></ProtectedRoute>} />
+              <Route path="/admin/donations" element={<ProtectedRoute><ManageDonations /></ProtectedRoute>} />
             </Routes>
           </main>
           <Footer />

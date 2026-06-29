@@ -36,6 +36,8 @@ const Home = () => {
   const [modalStep, setModalStep] = useState<number>(1);
   const [isClaiming, setIsClaiming] = useState(false);
   const [pendingLink, setPendingLink] = useState('');
+  const [donorName, setDonorName] = useState('');
+  const [flowType, setFlowType] = useState<'pix' | 'link'>('pix');
 
   useEffect(() => {
     getPresents()
@@ -65,7 +67,7 @@ const Home = () => {
     if (!selectedGift) return;
     setIsClaiming(true);
     try {
-      await claimPresent(selectedGift.id);
+      await claimPresent(selectedGift.id, selectedGift.title, donorName.trim() || 'Anônimo');
       setGifts(gifts.map(g => g.id === selectedGift.id ? { ...g, status: 'claimed' } : g));
       setModalStep(3);
     } catch (err) {
@@ -88,9 +90,9 @@ const Home = () => {
     setModalStep(4);
   };
 
-  const copyPix = () => {
-    navigator.clipboard.writeText(config.pixKey);
-    setToastMsg('Chave PIX copiada!');
+  const copyPix = (key: string, label: string) => {
+    navigator.clipboard.writeText(key);
+    setToastMsg(`Código PIX de ${label} copiado!`);
     setToastVisible(true);
   };
 
@@ -290,7 +292,7 @@ const Home = () => {
                     </div>
                   )}
                   
-                  <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setModalStep(2)}>
+                  <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { setFlowType('pix'); setModalStep(5); }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>volunteer_activism</span>
                     Presentear via PIX
                   </button>
@@ -304,24 +306,35 @@ const Home = () => {
                 <h3 className="text-headline-md text-on-background" style={{ marginBottom: '8px' }}>Fazer PIX</h3>
                 <p className="text-body-md text-on-surface-variant" style={{ marginBottom: '24px' }}>
                   {selectedGift.price === 0 ? (
-                    <>Envie o valor que seu coração mandar para a chave abaixo:</>
+                    <>Envie o valor que seu coração mandar para uma das chaves abaixo:</>
                   ) : (
-                    <>Envie o valor de <strong>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</strong> para a chave abaixo:</>
+                    <>Envie o valor de <strong>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</strong> para uma das chaves abaixo:</>
                   )}
                 </p>
                 
                 <div style={{ backgroundColor: 'var(--surface-variant)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                  <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>QR Code</p>
+                  <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>QR Code (Lucas)</p>
                   <img src="/pix.png" alt="QR Code PIX" style={{ width: '150px', height: '150px', margin: '0 auto 16px', display: 'block', borderRadius: '8px', border: '4px solid white' }} />
                   
-                  <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>Chave PIX</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)', margin: '16px 0' }} />
+
+                  <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>Chave PIX (Lucas)</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
                     <p className="text-body-lg text-primary" style={{ fontWeight: 'bold' }}>65 9 9997-6652</p>
-                    <button onClick={copyPix} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', display: 'flex', alignItems: 'center', padding: '4px' }} title="Copiar Chave PIX">
+                    <button onClick={() => copyPix(config.pixKey, 'Lucas')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', display: 'flex', alignItems: 'center', padding: '4px' }} title="Copiar Chave Lucas">
                       <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>content_copy</span>
                     </button>
                   </div>
-                  <p className="text-label-sm text-secondary" style={{ marginTop: '4px' }}>{config.pixName}</p>
+                  
+                  <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)', margin: '16px 0' }} />
+
+                  <p className="text-label-md text-on-background" style={{ marginBottom: '8px', fontWeight: 'bold' }}>Chave PIX (Anna)</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <p className="text-body-lg text-primary" style={{ fontWeight: 'bold' }}>81 9 8109-1799</p>
+                    <button onClick={() => copyPix(config.pixKeyAnna, 'Anna')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', display: 'flex', alignItems: 'center', padding: '4px' }} title="Copiar Chave Anna">
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>content_copy</span>
+                    </button>
+                  </div>
                 </div>
                 
                 <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)', marginBottom: '24px' }} />
@@ -333,7 +346,7 @@ const Home = () => {
                   {isClaiming ? 'Confirmando...' : 'Confirmar Presente'}
                 </button>
                 
-                <button className="btn-text text-label-md" style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }} onClick={() => setModalStep(1)}>
+                <button className="btn-text text-label-md" style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }} onClick={() => setModalStep(5)}>
                   Voltar
                 </button>
               </div>
@@ -366,8 +379,8 @@ const Home = () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => {
-                    window.open(pendingLink, '_blank');
-                    handleClaim();
+                    setFlowType('link');
+                    setModalStep(5);
                   }} disabled={isClaiming}>
                     {isClaiming ? 'Confirmando...' : 'Vou comprar e Confirmar Presente'}
                   </button>
@@ -383,6 +396,50 @@ const Home = () => {
                     Voltar
                   </button>
                 </div>
+              </div>
+            )}
+
+            {modalStep === 5 && (
+              <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+                <span className="material-symbols-outlined text-primary" style={{ fontSize: '48px', marginBottom: '16px' }}>person</span>
+                <h3 className="text-headline-md text-on-background" style={{ marginBottom: '8px' }}>Quem está presenteando?</h3>
+                <p className="text-body-md text-on-surface-variant" style={{ marginBottom: '24px' }}>
+                  Por favor, insira o seu nome para colocarmos na nossa lista de agradecimentos.
+                </p>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!donorName.trim()) return;
+                  if (flowType === 'pix') {
+                    setModalStep(2);
+                  } else {
+                    window.open(pendingLink, '_blank');
+                    handleClaim();
+                  }
+                }} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+                  <div>
+                    <label className="text-label-md text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>Nome Completo *</label>
+                    <input 
+                      required
+                      type="text"
+                      value={donorName}
+                      onChange={(e) => setDonorName(e.target.value)}
+                      placeholder="Seu nome"
+                      className="input-field"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+
+                  <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }} disabled={isClaiming}>
+                    {isClaiming ? 'Confirmando...' : (flowType === 'pix' ? 'Avançar para o PIX' : 'Confirmar e ir para a Loja')}
+                  </button>
+                  
+                  <button type="button" className="btn-text text-label-md" style={{ width: '100%', justifyContent: 'center' }} onClick={() => {
+                    setModalStep(flowType === 'pix' ? 1 : 4);
+                  }}>
+                    Voltar
+                  </button>
+                </form>
               </div>
             )}
           </div>

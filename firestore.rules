@@ -77,6 +77,16 @@ service cloud.firestore {
              (!('status' in request.resource.data) || request.resource.data.status in ['available', 'claimed']);
     }
 
+    function isValidDonation() {
+      return hasRequiredFields(['present_id', 'present_name', 'donor_name', 'created_at']) &&
+             hasOnlyAllowedFields(['present_id', 'present_name', 'donor_name', 'created_at']) &&
+             validStringLength('present_id', 1, 100) &&
+             validStringLength('present_name', 1, 200) &&
+             validStringLength('donor_name', 1, 200) &&
+             request.resource.data.created_at is string &&
+             request.resource.data.created_at.size() <= 50;
+    }
+
     function isValidRSVP() {
       return hasRequiredFields(['name', 'phone', 'status', 'companion', 'created_at']) &&
              hasOnlyAllowedFields(['name', 'email', 'phone', 'message', 'status', 'companion', 'companion_name', 'created_at']) &&
@@ -109,6 +119,13 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow delete: if isAuthenticated();
       allow update: if false;
+    }
+
+    // Donations: public create, authenticated read/delete
+    match /donations/{donationId} {
+      allow create: if isValidDonation();
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated();
     }
 
     // Default deny all other collections
