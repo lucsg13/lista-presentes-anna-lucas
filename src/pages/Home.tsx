@@ -68,14 +68,14 @@ const Home = () => {
           <div className="hero-content-inner">
             <div className="hero-header-flex animate-in">
               <div className="hero-header-text">
-                <span className="hero-badge">
+                <span className="hero-badge animate-in">
                   ✦ Sejam bem-vindos!
                 </span>
-                <h1 className="text-headline-lg text-primary hero-title animate-in-delay-1">
+                <h1 className="text-headline-lg text-primary hero-title animate-in animate-in-delay-1">
                   📦 Mudança à vista!
                 </h1>
               </div>
-              <div className="hero-profile-container animate-in-delay-1">
+              <div className="hero-profile-container animate-in animate-in-delay-1">
                 <img src="/couple.jpeg" alt="Anna & Lucas" className="hero-profile-image" />
               </div>
             </div>
