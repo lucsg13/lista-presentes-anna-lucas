@@ -786,8 +786,8 @@ input, textarea, select {
 
 .hero-profile-container {
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid var(--primary-fixed);
@@ -811,8 +811,8 @@ input, textarea, select {
     gap: var(--space-lg);
   }
   .hero-profile-container {
-    width: 110px;
-    height: 110px;
+    width: 132px;
+    height: 132px;
     border: 4px solid var(--primary-fixed);
   }
 }
