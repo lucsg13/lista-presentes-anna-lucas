@@ -1342,6 +1342,22 @@ input, textarea, select {
   }
 }
 
+/* Claimed Gift Styles */
+.gift-claimed {
+  filter: grayscale(80%);
+  opacity: 0.8;
+}
+
+@media (hover: hover) {
+  .gift-card.gift-claimed:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .gift-card.gift-claimed:hover .gift-image {
+    transform: none;
+  }
+}
+
 /* Claimed overlay */
 .claimed-overlay {
   position: absolute;

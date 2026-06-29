@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { cartCount } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,12 +37,6 @@ const Navbar = () => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Link to="/cart" aria-label="Shopping Cart" className="nav-cart-btn">
-            <span className="material-symbols-outlined">shopping_bag</span>
-            {cartCount > 0 && (
-              <span className="cart-badge" key={cartCount}>{cartCount}</span>
-            )}
-          </Link>
 
           <button
             className="mobile-menu-btn"
@@ -67,10 +59,7 @@ const Navbar = () => {
           <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>mail</span>
           Confirmar Presença
         </Link>
-        <Link to="/cart" className={`mobile-nav-link ${location.pathname === '/cart' ? 'active' : ''}`}>
-          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>shopping_bag</span>
-          Carrinho {cartCount > 0 && `(${cartCount})`}
-        </Link>
+
       </div>
     </nav>
   );

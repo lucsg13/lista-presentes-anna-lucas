@@ -1,9 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { config, categories } from '../config/data';
-import { useCart } from '../context/CartContext';
 import Toast from '../components/Toast';
-import { getPresents } from '../services/api';
+import { getPresents, claimPresent } from '../services/api';
 
 interface Present {
   id: string;
@@ -13,6 +12,7 @@ interface Present {
   description: string;
   links: string[];
   image_url: string;
+  status?: 'available' | 'claimed';
 }
 
 const Home = () => {
@@ -22,7 +22,8 @@ const Home = () => {
   const [toastVisible, setToastVisible] = useState(false);
   const [gifts, setGifts] = useState<any[]>([]);
   const [selectedGift, setSelectedGift] = useState<any | null>(null);
-  const { addToCart } = useCart();
+  const [modalStep, setModalStep] = useState<1 | 2 | 3>(1);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   useEffect(() => {
     getPresents()
@@ -35,7 +36,7 @@ const Home = () => {
           description: p.description,
           links: p.links,
           imageUrl: p.image_url || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600&auto=format&fit=crop',
-          status: 'available'
+          status: p.status || 'available'
         }));
         setGifts(formattedGifts);
       })
@@ -48,17 +49,33 @@ const Home = () => {
 
   const displayedGifts = showAll ? filteredGifts : filteredGifts.slice(0, 4);
 
-  const handleAddToCart = useCallback((gift: typeof gifts[0]) => {
-    addToCart({
-      id: gift.id,
-      title: gift.title,
-      price: gift.price,
-      category: gift.category,
-      imageUrl: gift.imageUrl,
-    });
-    setToastMsg(`${gift.title} adicionado ao carrinho!`);
+  const handleClaim = async () => {
+    if (!selectedGift) return;
+    setIsClaiming(true);
+    try {
+      await claimPresent(selectedGift.id);
+      setGifts(gifts.map(g => g.id === selectedGift.id ? { ...g, status: 'claimed' } : g));
+      setModalStep(3);
+    } catch (err) {
+      console.error(err);
+      setToastMsg('Erro ao confirmar o presente. Tente novamente.');
+      setToastVisible(true);
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const handleOpenGift = (gift: any) => {
+    if (gift.status === 'claimed') return;
+    setSelectedGift(gift);
+    setModalStep(1);
+  };
+
+  const copyPix = () => {
+    navigator.clipboard.writeText(config.pixKey);
+    setToastMsg('Chave PIX copiada!');
     setToastVisible(true);
-  }, [addToCart]);
+  };
 
   return (
     <>
@@ -145,9 +162,7 @@ const Home = () => {
             <p className="text-body-md text-on-surface-variant registry-subtitle">
               Sua presença é o nosso maior presente! Mas se quiser nos ajudar a montar nossa casa, selecionamos alguns itens que precisamos.
 
-              Ah, lembrando que você pode nos enviar pelo <a href={config.events.mapUrl} target="_blank" rel="noopener noreferrer" className="text-body-md text-on-surface-variant detail-card-address" style={{ textDecoration: 'underline', color: 'inherit', display: 'block', marginBottom: '12px' }}>
-                {config.events.mapUrl}
-              </a> ou o valor em dinheiro pelo PIX ou até mesmo comprar o presente e entregar na festa (se for pequeno, exemplo Air Fryer, panelas, jogos de cama, luminária, decorações e etc...)
+              Ah, lembrando que você pode nos enviar pelo PIX ou até mesmo comprar o presente e entregar na festa (se for pequeno, exemplo Air Fryer, panelas, jogos de cama, luminária, decorações e etc...)
             </p>
             <div className="category-filters">
               <button
@@ -170,7 +185,7 @@ const Home = () => {
 
           <div className="gift-grid">
             {displayedGifts.map((gift, index) => (
-              <div key={gift.id} className="gift-card animate-in" style={{ animationDelay: `${index * 0.08}s`, cursor: 'pointer' }} onClick={() => setSelectedGift(gift)}>
+              <div key={gift.id} className={`gift-card animate-in ${gift.status === 'claimed' ? 'gift-claimed' : ''}`} style={{ animationDelay: `${index * 0.08}s`, cursor: gift.status === 'claimed' ? 'default' : 'pointer' }} onClick={() => handleOpenGift(gift)}>
                 <div className="gift-image-wrap">
                   <img
                     src={gift.imageUrl}
@@ -194,13 +209,14 @@ const Home = () => {
 
                   <div className="gift-actions">
                     {gift.status === 'available' ? (
-                      <button className="btn-present" onClick={(e) => { e.stopPropagation(); setSelectedGift(gift); }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>visibility</span>
-                        Ver Detalhes
+                      <button className="btn-present" onClick={(e) => { e.stopPropagation(); handleOpenGift(gift); }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>redeem</span>
+                        Presentear
                       </button>
                     ) : (
-                      <button className="btn-present-disabled" disabled>
-                        Indisponível
+                      <button className="btn-present-disabled" disabled style={{ backgroundColor: 'transparent', color: 'var(--secondary)', border: 'none', padding: 0 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>lock</span>
+                        Esgotado
                       </button>
                     )}
                   </div>
@@ -223,40 +239,95 @@ const Home = () => {
       {selectedGift && (
         <div className="modal-overlay" onClick={() => setSelectedGift(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div className="modal-content animate-in" onClick={e => e.stopPropagation()} style={{ backgroundColor: 'var(--surface)', borderRadius: '16px', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-            <button onClick={() => setSelectedGift(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--surface-variant)', color: 'var(--on-surface-variant)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <button onClick={() => setSelectedGift(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--surface-variant)', color: 'var(--on-surface-variant)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}>
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
             </button>
-            <img src={selectedGift.imageUrl} alt={selectedGift.title} style={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }} />
-            <div style={{ padding: '24px' }}>
-              <span className="text-label-sm text-secondary">{selectedGift.category}</span>
-              <h3 className="text-headline-md text-on-background" style={{ margin: '8px 0' }}>{selectedGift.title}</h3>
-              <p className="text-headline-sm text-primary" style={{ marginBottom: '16px' }}>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</p>
-              
-              {selectedGift.description && (
-                <div style={{ marginBottom: '24px' }}>
-                  <h4 className="text-label-lg text-on-background" style={{ marginBottom: '8px' }}>Descrição</h4>
-                  <p className="text-body-md text-on-surface-variant" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>{selectedGift.description}</p>
+            
+            {modalStep === 1 && (
+              <>
+                <img src={selectedGift.imageUrl} alt={selectedGift.title} style={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }} />
+                <div style={{ padding: '24px' }}>
+                  <span className="text-label-sm text-secondary">{selectedGift.category}</span>
+                  <h3 className="text-headline-md text-on-background" style={{ margin: '8px 0' }}>{selectedGift.title}</h3>
+                  <p className="text-headline-sm text-primary" style={{ marginBottom: '16px' }}>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</p>
+                  
+                  {selectedGift.description && (
+                    <div style={{ marginBottom: '24px' }}>
+                      <h4 className="text-label-lg text-on-background" style={{ marginBottom: '8px' }}>Descrição</h4>
+                      <p className="text-body-md text-on-surface-variant" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>{selectedGift.description}</p>
+                    </div>
+                  )}
+                  
+                  {selectedGift.links && selectedGift.links.length > 0 && selectedGift.links[0] !== '' && (
+                    <div style={{ marginBottom: '24px' }}>
+                      <h4 className="text-label-lg text-on-background" style={{ marginBottom: '8px' }}>Links Sugeridos</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {selectedGift.links.map((link: string, i: number) => link.trim() !== '' && (
+                          <a key={i} href={link} target="_blank" rel="noreferrer" className="btn-outline text-label-md" style={{ justifyContent: 'center', width: '100%' }}>
+                            Ver Opção {i + 1} na Loja
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setModalStep(2)}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>volunteer_activism</span>
+                    Presentear via PIX
+                  </button>
                 </div>
-              )}
-              
-              {selectedGift.links && selectedGift.links.length > 0 && selectedGift.links[0] !== '' && (
-                <div style={{ marginBottom: '24px' }}>
-                  <h4 className="text-label-lg text-on-background" style={{ marginBottom: '8px' }}>Links Sugeridos</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {selectedGift.links.map((link: string, i: number) => link.trim() !== '' && (
-                      <a key={i} href={link} target="_blank" rel="noreferrer" className="btn-outline text-label-md" style={{ justifyContent: 'center', width: '100%' }}>
-                        Ver Opção {i + 1}
-                      </a>
-                    ))}
-                  </div>
+              </>
+            )}
+
+            {modalStep === 2 && (
+              <div style={{ padding: '40px 24px 24px', textAlign: 'center' }}>
+                <span className="material-symbols-outlined text-primary" style={{ fontSize: '48px', marginBottom: '16px' }}>pix</span>
+                <h3 className="text-headline-md text-on-background" style={{ marginBottom: '8px' }}>Fazer PIX</h3>
+                <p className="text-body-md text-on-surface-variant" style={{ marginBottom: '24px' }}>
+                  Envie o valor de <strong>R$ {selectedGift.price.toFixed(2).replace('.', ',')}</strong> para a chave abaixo:
+                </p>
+                
+                <div style={{ backgroundColor: 'var(--surface-variant)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <p className="text-label-md text-on-background" style={{ marginBottom: '4px' }}>Chave PIX</p>
+                  <p className="text-body-lg text-primary" style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>{config.pixKey}</p>
+                  <p className="text-label-sm text-secondary" style={{ marginTop: '4px' }}>{config.pixName}</p>
                 </div>
-              )}
-              
-              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { handleAddToCart(selectedGift); setSelectedGift(null); }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_shopping_cart</span>
-                Presentear
-              </button>
-            </div>
+
+                <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center', marginBottom: '24px' }} onClick={copyPix}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>content_copy</span>
+                  Copiar Chave PIX
+                </button>
+                
+                <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)', marginBottom: '24px' }} />
+                
+                <p className="text-label-md text-on-surface-variant" style={{ marginBottom: '16px' }}>
+                  Já fez o PIX ou vai entregar no dia?
+                </p>
+                <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleClaim} disabled={isClaiming}>
+                  {isClaiming ? 'Confirmando...' : 'Confirmar Presente'}
+                </button>
+                
+                <button className="btn-text text-label-md" style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }} onClick={() => setModalStep(1)}>
+                  Voltar
+                </button>
+              </div>
+            )}
+
+            {modalStep === 3 && (
+              <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(219, 193, 185, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                  <span className="material-symbols-outlined text-primary" style={{ fontSize: '40px', fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                </div>
+                <h3 className="text-headline-md text-on-background" style={{ marginBottom: '16px' }}>Muito Obrigado!</h3>
+                <p className="text-body-lg text-on-surface-variant" style={{ marginBottom: '32px', lineHeight: '1.5' }}>
+                  Vocês são incríveis! Agradecemos de coração pelo <strong>{selectedGift.title}</strong>.<br/><br/>
+                  Mal podemos esperar para comemorar juntos!
+                </p>
+                <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setSelectedGift(null)}>
+                  Fechar
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

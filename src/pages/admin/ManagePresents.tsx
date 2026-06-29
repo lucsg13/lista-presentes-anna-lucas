@@ -16,7 +16,8 @@ export default function ManagePresents() {
     category: categories[0] || '',
     description: '',
     links: [''],
-    image_url: ''
+    image_url: '',
+    status: 'available' as 'available' | 'claimed'
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -106,7 +107,8 @@ export default function ManagePresents() {
         category: formData.category,
         description: formData.description,
         links: formData.links.filter(l => l.trim() !== ''),
-        image_url: finalImageUrl
+        image_url: finalImageUrl,
+        status: formData.status
       };
 
       if (editingId) {
@@ -115,7 +117,7 @@ export default function ManagePresents() {
         await addPresent(payload);
       }
       
-      setFormData({ name: '', price: '', category: categories[0] || '', description: '', links: [''], image_url: '' });
+      setFormData({ name: '', price: '', category: categories[0] || '', description: '', links: [''], image_url: '', status: 'available' });
       setImageFile(null);
       setEditingId(null);
       fetchPresents();
@@ -139,7 +141,8 @@ export default function ManagePresents() {
       category: p.category || categories[0] || '',
       description: p.description || '',
       links: p.links && p.links.length > 0 ? p.links : [''],
-      image_url: p.image_url
+      image_url: p.image_url,
+      status: p.status || 'available'
     });
     setImageFile(null);
   };
@@ -156,7 +159,7 @@ export default function ManagePresents() {
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setFormData({ name: '', price: '', category: categories[0] || '', description: '', links: [''], image_url: '' });
+    setFormData({ name: '', price: '', category: categories[0] || '', description: '', links: [''], image_url: '', status: 'available' });
     setImageFile(null);
   };
 
@@ -203,8 +206,22 @@ export default function ManagePresents() {
                 {categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
-              </select>
-            </div>
+                </select>
+              </div>
+              
+              <div>
+                <label className="text-label-md text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>Status *</label>
+                <select
+                  required
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="input-field"
+                >
+                  <option value="available">Disponível</option>
+                  <option value="claimed">Esgotado (Já Presenteado)</option>
+                </select>
+              </div>
             <div>
               <label className="text-label-md text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>Foto do Produto {editingId && formData.image_url ? '(Opcional se mantida)' : '*'}</label>
               <input 

@@ -26,6 +26,7 @@ export interface Present {
   description: string;
   links: string[];
   image_url: string;
+  status?: 'available' | 'claimed';
 }
 
 export async function getPresents(): Promise<Present[]> {
@@ -44,6 +45,10 @@ export async function updatePresent(id: string, data: Omit<Present, 'id'>): Prom
 
 export async function deletePresent(id: string): Promise<void> {
   await deleteDoc(doc(db, 'presents', id));
+}
+
+export async function claimPresent(id: string): Promise<void> {
+  await updateDoc(doc(db, 'presents', id), { status: 'claimed' });
 }
 
 // ==========================================
