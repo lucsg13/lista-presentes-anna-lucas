@@ -63,7 +63,7 @@ service cloud.firestore {
 
     function isValidPresent() {
       return hasRequiredFields(['name', 'price', 'category', 'description', 'links']) &&
-             hasOnlyAllowedFields(['name', 'price', 'category', 'description', 'links', 'image_url', 'link']) &&
+             hasOnlyAllowedFields(['name', 'price', 'category', 'description', 'links', 'image_url', 'link', 'status']) &&
              validStringLength('name', 1, 200) &&
              request.resource.data.price is number &&
              request.resource.data.price > 0 &&
@@ -73,7 +73,8 @@ service cloud.firestore {
              request.resource.data.links is list &&
              request.resource.data.links.size() <= 20 &&
              isOptionalString('image_url', 2000) &&
-             isOptionalString('link', 2000);
+             isOptionalString('link', 2000) &&
+             (!('status' in request.resource.data) || request.resource.data.status in ['available', 'claimed']);
     }
 
     function isValidRSVP() {
