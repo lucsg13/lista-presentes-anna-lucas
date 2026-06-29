@@ -288,14 +288,17 @@ const Home = () => {
                 </p>
                 
                 <div style={{ backgroundColor: 'var(--surface-variant)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                  <p className="text-label-md text-on-background" style={{ marginBottom: '4px' }}>Chave PIX</p>
-                  <p className="text-body-lg text-primary" style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>{config.pixKey}</p>
+                  <img src="/pix-qrcode.png" alt="QR Code PIX" style={{ width: '150px', height: '150px', margin: '0 auto 16px', display: 'block', borderRadius: '8px', border: '4px solid white' }} />
+                  <p className="text-label-md text-on-background" style={{ marginBottom: '4px' }}>Código PIX (Copia e Cola)</p>
+                  <p className="text-body-md text-primary" style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>
+                    {config.pixKey.substring(0, 20)}...{config.pixKey.substring(config.pixKey.length - 15)}
+                  </p>
                   <p className="text-label-sm text-secondary" style={{ marginTop: '4px' }}>{config.pixName}</p>
                 </div>
 
                 <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center', marginBottom: '24px' }} onClick={copyPix}>
                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>content_copy</span>
-                  Copiar Chave PIX
+                  Copiar Código PIX
                 </button>
                 
                 <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)', marginBottom: '24px' }} />

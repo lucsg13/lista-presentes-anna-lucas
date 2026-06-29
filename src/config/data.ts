@@ -1,6 +1,6 @@
 export const config = {
-  pixKey: "chadecasanova@anna-lucas.com",
-  pixName: "Anna e Lucas",
+  pixKey: "00020126360014BR.GOV.BCB.PIX0114+55659999766525204000053039865802BR5918Lucas Gomes Soares6009SAO PAULO62140510rs3X3bhkfN630432A0",
+  pixName: "Lucas Gomes Soares",
   events: {
     date: "Sábado, 18 de Julho",
     time: "Às 19h",
