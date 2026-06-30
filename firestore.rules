@@ -110,7 +110,11 @@ service cloud.firestore {
     match /presents/{presentId} {
       allow read: if true;
       allow create: if isAuthenticated() && isValidPresent();
-      allow update: if isAuthenticated() && isValidPresent();
+      allow update: if (isAuthenticated() && isValidPresent()) || 
+                       (!isAuthenticated() && 
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) && 
+                        request.resource.data.status == 'claimed' && 
+                        (!('status' in resource.data) || resource.data.status == 'available'));
       allow delete: if isAuthenticated();
     }
 

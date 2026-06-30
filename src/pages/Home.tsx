@@ -83,6 +83,7 @@ const Home = () => {
   const handleOpenGift = (gift: any) => {
     if (gift.status === 'claimed') return;
     setSelectedGift(gift);
+    setDonorName('');
     setModalStep(1);
   };
 
