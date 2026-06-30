@@ -27,16 +27,23 @@ export interface Present {
   links: string[];
   image_url: string;
   status?: 'available' | 'claimed';
+  created_at?: string;
 }
 
 export async function getPresents(): Promise<Present[]> {
   const snapshot = await getDocs(collection(db, 'presents'));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Present));
+  const presents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Present));
+  return presents.sort((a, b) => {
+    const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return timeB - timeA;
+  });
 }
 
 export async function addPresent(data: Omit<Present, 'id'>): Promise<Present> {
-  const docRef = await addDoc(collection(db, 'presents'), data);
-  return { id: docRef.id, ...data };
+  const dataWithTimestamp = { ...data, created_at: new Date().toISOString() };
+  const docRef = await addDoc(collection(db, 'presents'), dataWithTimestamp);
+  return { id: docRef.id, ...dataWithTimestamp };
 }
 
 export async function updatePresent(id: string, data: Omit<Present, 'id'>): Promise<void> {

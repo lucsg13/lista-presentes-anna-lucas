@@ -28,7 +28,6 @@ const SPECIAL_GIFT = {
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const [gifts, setGifts] = useState<any[]>([]);
@@ -61,7 +60,7 @@ const Home = () => {
     ? gifts.filter(g => g.category === selectedCategory)
     : gifts;
 
-  const displayedGifts = showAll ? filteredGifts : filteredGifts.slice(0, 4);
+  const displayedGifts = filteredGifts;
 
   const handleClaim = async () => {
     if (!selectedGift) return;
@@ -246,13 +245,7 @@ const Home = () => {
             ))}
           </div>
 
-          {filteredGifts.length > 4 && (
-            <div className="show-more-btn">
-              <button className="btn-outline text-label-md" onClick={() => setShowAll(!showAll)}>
-                {showAll ? 'Ver Menos' : 'Ver Todos os Itens'}
-              </button>
-            </div>
-          )}
+
         </div>
       </section>
 

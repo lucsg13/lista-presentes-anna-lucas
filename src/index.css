@@ -1170,33 +1170,19 @@ input, textarea, select {
   box-shadow: 0 4px 12px rgba(148, 68, 38, 0.2);
 }
 
-/* Gift cards grid — 2 columns on mobile */
+/* Gift cards grid */
 .gift-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
   margin-top: var(--space-lg);
 }
 
-@media (max-width: 359px) {
-  .gift-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-}
-
 @media (min-width: 768px) {
   .gift-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 20px;
     margin-top: var(--space-xl);
-  }
-}
-
-@media (min-width: 1024px) {
-  .gift-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
   }
 }
 
