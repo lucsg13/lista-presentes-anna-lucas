@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Download, Loader2, Users, CheckCircle, XCircle } from 'lucide-react';
+import { Download, Loader2, Users, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
 import { getRSVPs, deleteRSVP, type RSVP } from '../../services/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -7,6 +7,7 @@ import autoTable from 'jspdf-autotable';
 export default function ManageRSVP() {
   const [rsvps, setRsvps] = useState<RSVP[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
 
   const fetchRSVPs = useCallback(async () => {
     try {
@@ -141,8 +142,19 @@ export default function ManageRSVP() {
                     <td className="text-body-sm text-on-surface-variant">
                       {r.companion === 'yes' ? r.companion_name || 'Sim' : 'Não'}
                     </td>
-                    <td className="text-body-sm text-on-surface-variant" style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {r.message || '-'}
+                    <td className="text-body-sm text-on-surface-variant" style={{ maxWidth: '200px' }}>
+                      {r.message ? (
+                        <div 
+                          onClick={() => setSelectedMessage(r.message)}
+                          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px' }}
+                          title="Clique para ler a mensagem completa"
+                        >
+                          <MessageCircle style={{ width: '14px', height: '14px', flexShrink: 0 }} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.message}</span>
+                        </div>
+                      ) : (
+                        '-'
+                      )}
                     </td>
                     <td>
                       <button onClick={() => handleDelete(r.id)} style={{ color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Remover">
@@ -156,6 +168,28 @@ export default function ManageRSVP() {
           </div>
         )}
       </div>
+
+      {selectedMessage && (
+        <div className="modal-overlay" onClick={() => setSelectedMessage(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div className="modal-content animate-in" onClick={e => e.stopPropagation()} style={{ backgroundColor: 'var(--surface)', borderRadius: '16px', maxWidth: '500px', width: '100%', padding: '24px', position: 'relative' }}>
+            <button onClick={() => setSelectedMessage(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--surface-variant)', color: 'var(--on-surface-variant)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <XCircle style={{ width: '20px', height: '20px' }} />
+            </button>
+            <h3 className="text-headline-sm text-on-background" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MessageCircle className="text-primary" style={{ width: '24px', height: '24px' }} />
+              Mensagem
+            </h3>
+            <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '8px' }}>
+              <p className="text-body-md text-on-surface-variant" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                {selectedMessage}
+              </p>
+            </div>
+            <button className="btn-primary" style={{ width: '100%', marginTop: '24px', justifyContent: 'center' }} onClick={() => setSelectedMessage(null)}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
