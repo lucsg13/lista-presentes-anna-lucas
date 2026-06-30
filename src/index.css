@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 /* ═══════════════════════════════════
@@ -71,8 +71,8 @@
   --navbar-height: 60px;
 
   /* Typography */
-  --font-inter: 'Inter', sans-serif;
-  --font-playfair: 'Playfair Display', serif;
+  --font-inter: 'Cinzel', serif;
+  --font-playfair: 'Cinzel', serif;
 
   /* Touch target */
   --tap-target: 44px;
