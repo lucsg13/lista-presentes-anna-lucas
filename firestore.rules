@@ -63,7 +63,7 @@ service cloud.firestore {
 
     function isValidPresent() {
       return hasRequiredFields(['name', 'price', 'category', 'description', 'links']) &&
-             hasOnlyAllowedFields(['name', 'price', 'category', 'description', 'links', 'image_url', 'link', 'status']) &&
+             hasOnlyAllowedFields(['name', 'price', 'category', 'description', 'links', 'image_url', 'link', 'status', 'created_at']) &&
              validStringLength('name', 1, 200) &&
              request.resource.data.price is number &&
              request.resource.data.price > 0 &&
@@ -74,6 +74,7 @@ service cloud.firestore {
              request.resource.data.links.size() <= 20 &&
              isOptionalString('image_url', 2000) &&
              isOptionalString('link', 2000) &&
+             isOptionalString('created_at', 50) &&
              (!('status' in request.resource.data) || request.resource.data.status in ['available', 'claimed']);
     }
 
