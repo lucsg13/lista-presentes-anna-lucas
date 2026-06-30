@@ -145,6 +145,7 @@ export default function ManagePresents() {
       status: p.status || 'available'
     });
     setImageFile(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id: string) => {
@@ -324,6 +325,11 @@ export default function ManagePresents() {
                       <span className="text-label-sm text-secondary" style={{ display: 'block', marginTop: '4px' }}>{p.category}</span>
                       {p.links && p.links.length > 0 && p.links[0] !== '' && (
                         <a href={p.links[0]} target="_blank" rel="noreferrer" className="text-label-sm text-primary" style={{ display: 'block', marginTop: '4px' }}>{p.links.length} Link(s)</a>
+                      )}
+                      {p.status === 'claimed' && (
+                        <span style={{ display: 'inline-block', marginTop: '6px', padding: '2px 8px', backgroundColor: 'var(--surface-variant)', color: 'var(--secondary)', borderRadius: '12px', fontSize: '11px', fontWeight: 600, border: '1px solid var(--outline-variant)' }}>
+                          Esgotado / Presenteado
+                        </span>
                       )}
                     </td>
                     <td className="text-body-md text-on-surface-variant">R$ {p.price.toFixed(2)}</td>
