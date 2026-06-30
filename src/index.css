@@ -1178,6 +1178,13 @@ input, textarea, select {
   margin-top: var(--space-lg);
 }
 
+@media (max-width: 359px) {
+  .gift-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
 @media (min-width: 768px) {
   .gift-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -2116,6 +2123,8 @@ input, textarea, select {
 
 /* Admin table wrapper */
 .admin-table-wrap {
+  width: 100%;
+  align-self: stretch;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
