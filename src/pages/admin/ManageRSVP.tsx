@@ -4,6 +4,23 @@ import { getRSVPs, deleteRSVP, type RSVP } from '../../services/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+const countPeople = (rsvpList: RSVP[]) => {
+  return rsvpList.reduce((total, r) => {
+    let count = 1; // Primary guest
+    if (r.companion === 'yes') {
+      if (r.companion_name) {
+        // Split by ' e ', ',', '/', '&' or ' - '
+        const names = r.companion_name.split(/\s+e\s+|\s*[,/&]\s*|\s+-\s+/i);
+        const validNames = names.filter(n => n.trim().length > 0);
+        count += validNames.length > 0 ? validNames.length : 1;
+      } else {
+        count += 1;
+      }
+    }
+    return total + count;
+  }, 0);
+};
+
 export default function ManageRSVP() {
   const [rsvps, setRsvps] = useState<RSVP[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +53,8 @@ export default function ManageRSVP() {
     doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 32);
     
     const confirmedRsvps = rsvps.filter(r => r.status === 'confirmed');
-    doc.text(`Total confirmados: ${confirmedRsvps.length}`, 14, 40);
+    const totalConfirmed = countPeople(confirmedRsvps);
+    doc.text(`Total confirmados: ${totalConfirmed}`, 14, 40);
 
     // Table
     autoTable(doc, {
@@ -69,6 +87,10 @@ export default function ManageRSVP() {
   const confirmed = rsvps.filter(r => r.status === 'confirmed');
   const declined = rsvps.filter(r => r.status === 'declined');
 
+  const totalCount = countPeople(rsvps);
+  const confirmedCount = countPeople(confirmed);
+  const declinedCount = countPeople(declined);
+
   return (
     <div className="admin-page page-with-navbar">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)', flexWrap: 'wrap', gap: '16px' }}>
@@ -85,17 +107,17 @@ export default function ManageRSVP() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: 'var(--space-xl)' }}>
         <div className="detail-card animate-in" style={{ textAlign: 'center', padding: 'var(--space-md)' }}>
           <Users className="text-primary" style={{ width: '28px', height: '28px', margin: '0 auto 8px' }} />
-          <div className="text-headline-md text-on-background">{rsvps.length}</div>
+          <div className="text-headline-md text-on-background">{totalCount}</div>
           <div className="text-label-sm text-on-surface-variant">Total</div>
         </div>
         <div className="detail-card animate-in animate-in-delay-1" style={{ textAlign: 'center', padding: 'var(--space-md)' }}>
           <CheckCircle className="text-secondary" style={{ width: '28px', height: '28px', margin: '0 auto 8px' }} />
-          <div className="text-headline-md text-on-background">{confirmed.length}</div>
+          <div className="text-headline-md text-on-background">{confirmedCount}</div>
           <div className="text-label-sm text-on-surface-variant">Confirmados</div>
         </div>
         <div className="detail-card animate-in animate-in-delay-2" style={{ textAlign: 'center', padding: 'var(--space-md)' }}>
           <XCircle style={{ width: '28px', height: '28px', margin: '0 auto 8px', color: 'var(--error)' }} />
-          <div className="text-headline-md text-on-background">{declined.length}</div>
+          <div className="text-headline-md text-on-background">{declinedCount}</div>
           <div className="text-label-sm text-on-surface-variant">Recusados</div>
         </div>
       </div>
